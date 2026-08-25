@@ -1,0 +1,160 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ProductCard from '../components/ProductCard.astro';
+import Cart from '../components/Cart.astro';
+import { products, categories } from '../data/products';
+---
+
+<Layout>
+	<main class="shop">
+		<section class="shop-hero">
+			<p class="eyebrow">MSB Store</p>
+			<h1>Shop the collection</h1>
+			<p class="shop-sub">A small selection of apparel, accessories, and everyday goods.</p>
+		</section>
+
+		<section class="shop-toolbar">
+			<div class="filters" id="filters">
+				{
+					categories.map((category, i) => (
+						<button class:list={['filter', { active: i === 0 }]} type="button" data-filter={category}>
+							{category}
+						</button>
+					))
+				}
+			</div>
+		</section>
+
+		<section class="product-grid" id="product-grid">
+			{products.map((product) => <ProductCard product={product} />)}
+		</section>
+
+		<p class="shop-empty" id="shop-empty" hidden>No products in this category.</p>
+	</main>
+	<Cart />
+</Layout>
+
+<script>
+	// Category filter — shows/hides product cards without a round-trip.
+	const filters = document.getElementById('filters') as HTMLElement;
+	const grid = document.getElementById('product-grid') as HTMLElement;
+	const empty = document.getElementById('shop-empty') as HTMLElement;
+
+	function applyFilter(category: string): void {
+		let visible = 0;
+		grid.querySelectorAll<HTMLElement>('.product-card').forEach((card) => {
+			const show = category === 'All' || card.dataset.category === category;
+			card.style.display = show ? '' : 'none';
+			if (show) visible++;
+		});
+		empty.hidden = visible !== 0;
+	}
+
+	filters.addEventListener('click', (e) => {
+		const btn = (e.target as HTMLElement).closest('[data-filter]') as HTMLElement | null;
+		if (!btn) return;
+		filters.querySelectorAll('.filter').forEach((b) => b.classList.remove('active'));
+		btn.classList.add('active');
+		applyFilter(btn.dataset.filter as string);
+	});
+</script>
+
+<style>
+	.shop {
+		font-family: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif;
+		max-width: 1120px;
+		width: 100%;
+		margin: 0 auto;
+		padding: 40px 24px 120px;
+	}
+
+	.shop-hero {
+		text-align: center;
+		padding: 24px 0 8px;
+	}
+
+	.eyebrow {
+		margin: 0 0 8px;
+		font-size: 13px;
+		text-transform: uppercase;
+		letter-spacing: 0.12em;
+		color: #6b7280;
+	}
+
+	.shop-hero h1 {
+		margin: 0 0 12px;
+		font-size: clamp(28px, 5vw, 40px);
+		font-weight: 700;
+		color: #111827;
+		letter-spacing: -0.02em;
+	}
+
+	.shop-sub {
+		margin: 0 auto;
+		max-width: 540px;
+		font-size: 16px;
+		line-height: 24px;
+		color: #4b5563;
+	}
+
+	.shop-toolbar {
+		display: flex;
+		justify-content: center;
+		padding: 28px 0 20px;
+	}
+
+	.filters {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+
+	.filter {
+		font-family: inherit;
+		font-size: 14px;
+		color: #4b5563;
+		background: #fff;
+		border: 1px solid rgba(17, 24, 39, 0.12);
+		border-radius: 999px;
+		padding: 8px 16px;
+		cursor: pointer;
+		transition:
+			color 0.2s,
+			background 0.2s,
+			border-color 0.2s;
+	}
+
+	.filter:hover {
+		border-color: rgba(17, 24, 39, 0.3);
+		color: #111827;
+	}
+
+	.filter.active {
+		color: #fff;
+		background: linear-gradient(83.21deg, #3245ff 0%, #bc52ee 100%);
+		border-color: transparent;
+	}
+
+	.product-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+		gap: 20px;
+	}
+
+	.shop-empty {
+		text-align: center;
+		color: #6b7280;
+		padding: 40px 0;
+	}
+
+	@media (max-width: 600px) {
+		.shop {
+			padding: 24px 16px 120px;
+		}
+
+		.product-grid {
+			grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+			gap: 14px;
+		}
+	}
+</style>
